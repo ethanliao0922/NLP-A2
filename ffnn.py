@@ -116,8 +116,7 @@ if __name__ == "__main__":
     train_data = convert_to_vector_representation(train_data, word2index)
     valid_data = convert_to_vector_representation(valid_data, word2index)
     
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = FFNN(input_dim=len(vocab), h=args.hidden_dim).to(device)
+    model = FFNN(input_dim = len(vocab), h = args.hidden_dim)
     optimizer = optim.SGD(model.parameters(),lr=0.01, momentum=0.9)
     print("========== Training for {} epochs ==========".format(args.epochs))
     for epoch in range(args.epochs):
@@ -136,8 +135,6 @@ if __name__ == "__main__":
             loss = None
             for example_index in range(minibatch_size):
                 input_vector, gold_label = train_data[minibatch_index * minibatch_size + example_index]
-                input_vector = input_vector.to(device)
-                gold_label = torch.tensor([gold_label], device=device)
                 predicted_vector = model(input_vector)
                 predicted_label = torch.argmax(predicted_vector)
                 correct += int(predicted_label == gold_label)
