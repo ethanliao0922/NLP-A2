@@ -76,6 +76,7 @@ def convert_to_vector_representation(data, word2index):
         vectorized_data.append((vector, y))
     return vectorized_data
 
+
 def load_data(train_data, val_data):
     with open(train_data) as training_f:
         training = json.load(training_f)
@@ -178,4 +179,40 @@ if __name__ == "__main__":
         print("Validation time for this epoch: {}".format(time.time() - start_time))
 
     # write out to results/test.out
-    
+    # Evaluate on test data if provided
+    if args.test_data != "to fill":
+        # Load and vectorize test data
+        print("========== Loading and Vectorizing Test Data ==========")
+        with open(args.test_data) as test_f:
+            test_data_raw = json.load(test_f)
+        test_data = [(elt["text"].split(), int(elt["stars"] - 1)) for elt in test_data_raw]
+        test_data = convert_to_vector_representation(test_data, word2index)
+
+        # Initialize variables to track performance
+        correct = 0
+        total = 0
+        results = []
+
+        print("========== Testing Model ==========")
+        start_time = time.time()
+        with torch.no_grad():
+            model.eval()  # Set model to evaluation mode
+            for input_vector, gold_label in test_data:
+                predicted_vector = model(input_vector)
+                predicted_label = torch.argmax(predicted_vector)
+                correct += int(predicted_label == gold_label)
+                total += 1
+                results.append(f"Predicted: {predicted_label}, Actual: {gold_label}")
+
+        # Calculate and log test accuracy
+        test_accuracy = correct / total
+        print("Testing completed.")
+        print(f"Test Accuracy: {test_accuracy}")
+        print("Testing time: {}".format(time.time() - start_time))
+
+        # Write results to file
+        os.makedirs("results", exist_ok=True)  # Ensure results directory exists
+        with open("results/test.out", "w") as f:
+            f.write(f"Test Accuracy: {test_accuracy}\n")
+            f.write("\nDetailed Results:\n")
+            f.write("\n".join(results))
