@@ -11,6 +11,8 @@ from tqdm import tqdm
 import json
 from argparse import ArgumentParser
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print("Using device:", device)
 
 unk = '<UNK>'
 # Consult the PyTorch documentation for information on the functions used below:
@@ -69,7 +71,7 @@ def make_indices(vocab):
 def convert_to_vector_representation(data, word2index):
     vectorized_data = []
     for document, y in data:
-        vector = torch.zeros(len(word2index)) 
+        vector = torch.zeros(len(word2index), device=device)
         for word in document:
             index = word2index.get(word, word2index[unk])
             vector[index] += 1
@@ -116,7 +118,7 @@ if __name__ == "__main__":
     train_data = convert_to_vector_representation(train_data, word2index)
     valid_data = convert_to_vector_representation(valid_data, word2index)
     
-    model = FFNN(input_dim = len(vocab), h = args.hidden_dim)
+    model = FFNN(input_dim=len(vocab), h=args.hidden_dim).to(device)
     optimizer = optim.SGD(model.parameters(),lr=0.01, momentum=0.9)
     print("========== Training for {} epochs ==========".format(args.epochs))
     for epoch in range(args.epochs):
@@ -139,7 +141,7 @@ if __name__ == "__main__":
                 predicted_label = torch.argmax(predicted_vector)
                 correct += int(predicted_label == gold_label)
                 total += 1
-                example_loss = model.compute_Loss(predicted_vector.view(1,-1), torch.tensor([gold_label]))
+                example_loss = model.compute_Loss(predicted_vector.view(1, -1), torch.tensor([gold_label], device=device))
                 if loss is None:
                     loss = example_loss
                 else:
@@ -168,7 +170,7 @@ if __name__ == "__main__":
                 predicted_label = torch.argmax(predicted_vector)
                 correct += int(predicted_label == gold_label)
                 total += 1
-                example_loss = model.compute_Loss(predicted_vector.view(1,-1), torch.tensor([gold_label]))
+                example_loss = model.compute_Loss(predicted_vector.view(1, -1), torch.tensor([gold_label], device=device))
                 if loss is None:
                     loss = example_loss
                 else:
