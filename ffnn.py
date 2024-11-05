@@ -137,7 +137,7 @@ if __name__ == "__main__":
             for example_index in range(minibatch_size):
                 input_vector, gold_label = train_data[minibatch_index * minibatch_size + example_index]
                 input_vector = input_vector.to(device)
-                gold_label = gold_label.to(device)
+                gold_label = torch.tensor([gold_label], device=device)
                 predicted_vector = model(input_vector)
                 predicted_label = torch.argmax(predicted_vector)
                 correct += int(predicted_label == gold_label)
