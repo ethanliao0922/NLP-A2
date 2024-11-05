@@ -116,7 +116,8 @@ if __name__ == "__main__":
     train_data = convert_to_vector_representation(train_data, word2index)
     valid_data = convert_to_vector_representation(valid_data, word2index)
     
-    model = FFNN(input_dim = len(vocab), h = args.hidden_dim)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = FFNN(input_dim=len(vocab), h=args.hidden_dim).to(device)
     optimizer = optim.SGD(model.parameters(),lr=0.01, momentum=0.9)
     print("========== Training for {} epochs ==========".format(args.epochs))
     for epoch in range(args.epochs):
