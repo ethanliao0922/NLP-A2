@@ -216,3 +216,9 @@ if __name__ == "__main__":
             f.write(f"Test Accuracy: {test_accuracy}\n")
             f.write("\nDetailed Results:\n")
             f.write("\n".join(results))
+
+    
+    # You may find it beneficial to keep track of training accuracy or training loss;
+
+    # Think about how to update the model and what this entails. Consider ffnn.py and the PyTorch documentation for guidance
+        
