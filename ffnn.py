@@ -187,6 +187,7 @@ if __name__ == "__main__":
         print("========== Loading and Vectorizing Test Data ==========")
         with open(args.test_data) as test_f:
             test_data_raw = json.load(test_f)
+            
         test_data = [(elt["text"].split(), int(elt["stars"] - 1)) for elt in test_data_raw]
         test_data = convert_to_vector_representation(test_data, word2index)
 

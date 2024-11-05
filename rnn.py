@@ -13,6 +13,10 @@ import string
 from argparse import ArgumentParser
 import pickle
 
+# Set device to GPU if available
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print("Using device:", device) 
+
 unk = '<UNK>'
 # Consult the PyTorch documentation for information on the functions used below:
 # https://pytorch.org/docs/stable/torch.html
@@ -77,7 +81,7 @@ if __name__ == "__main__":
     # Option 3 will be the most time consuming, so we do not recommend starting with this
 
     print("========== Vectorizing data ==========")
-    model = RNN(50, args.hidden_dim)  # Fill in parameters
+    model = RNN(50, args.hidden_dim).to(device)  # Fill in parameters
     # optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
     optimizer = optim.Adam(model.parameters(), lr=0.01)
     word_embedding = pickle.load(open('./Data_Embedding/word_embedding.pkl', 'rb'))
@@ -115,11 +119,11 @@ if __name__ == "__main__":
                 vectors = [word_embedding[i.lower()] if i.lower() in word_embedding.keys() else word_embedding['unk'] for i in input_words ]
 
                 # Transform the input into required shape
-                vectors = torch.tensor(vectors).view(len(vectors), 1, -1)
+                vectors = torch.tensor(vectors, device=device).view(len(vectors), 1, -1)
                 output = model(vectors)
 
                 # Get loss
-                example_loss = model.compute_Loss(output.view(1,-1), torch.tensor([gold_label]))
+                example_loss = model.compute_Loss(output.view(1,-1), torch.tensor([gold_label], device=device))
 
                 # Get predicted label
                 predicted_label = torch.argmax(output)
@@ -156,7 +160,7 @@ if __name__ == "__main__":
             vectors = [word_embedding[i.lower()] if i.lower() in word_embedding.keys() else word_embedding['unk'] for i
                        in input_words]
 
-            vectors = torch.tensor(vectors).view(len(vectors), 1, -1)
+            vectors = torch.tensor(vectors, device=device).view(len(vectors), 1, -1)
             output = model(vectors)
             predicted_label = torch.argmax(output)
             correct += int(predicted_label == gold_label)
@@ -178,13 +182,11 @@ if __name__ == "__main__":
 
     # Evaluate on test data if provided
     if args.test_data != "to fill":
-        # Load and vectorize test data
         print("========== Loading and Vectorizing Test Data ==========")
         with open(args.test_data) as test_f:
             test_data_raw = json.load(test_f)
         test_data = [(elt["text"].split(), int(elt["stars"] - 1)) for elt in test_data_raw]
 
-        # Initialize variables to track performance
         correct = 0
         total = 0
         results = []
@@ -192,28 +194,25 @@ if __name__ == "__main__":
         print("========== Testing Model ==========")
         start_time = time.time()
         with torch.no_grad():
-            model.eval()  # Set model to evaluation mode
-            for input_vector, gold_label in test_data:
-                predicted_vector = model(input_vector)
-                predicted_label = torch.argmax(predicted_vector)
+            model.eval()
+            for input_words, gold_label in test_data:
+                input_words = " ".join(input_words)
+                input_words = input_words.translate(input_words.maketrans("", "", string.punctuation)).split()
+                vectors = [word_embedding[i.lower()] if i.lower() in word_embedding.keys() else word_embedding['unk'] for i in input_words]
+                vectors = torch.tensor(vectors, device=device).view(len(vectors), 1, -1) 
+                output = model(vectors)
+                predicted_label = torch.argmax(output)
                 correct += int(predicted_label == gold_label)
                 total += 1
                 results.append(f"Predicted: {predicted_label}, Actual: {gold_label}")
 
-        # Calculate and log test accuracy
         test_accuracy = correct / total
         print("Testing completed.")
         print(f"Test Accuracy: {test_accuracy}")
         print("Testing time: {}".format(time.time() - start_time))
 
-        # Write results to file
-        os.makedirs("results", exist_ok=True)  # Ensure results directory exists
+        os.makedirs("results", exist_ok=True)
         with open("results/testRNN.out", "w") as f:
             f.write(f"Test Accuracy: {test_accuracy}\n")
             f.write("\nDetailed Results:\n")
             f.write("\n".join(results))
-
-
-    # You may find it beneficial to keep track of training accuracy or training loss;
-
-    # Think about how to update the model and what this entails. Consider ffnn.py and the PyTorch documentation for guidance
