@@ -73,11 +73,15 @@ if __name__ == "__main__":
     print("========== Loading data ==========")
     train_data, valid_data = load_data(args.train_data, args.val_data) # X_data is a list of pairs (document, y); y in {0,1,2,3,4}
 
-    # Think about the type of function that an RNN describes. To apply it, you will need to convert the text data into vector representations.
+    # Think about the type of function that an RNN describes. To apply it, you will 
+    # need to convert the text data into vector representations.
     # Further, think about where the vectors will come from. There are 3 reasonable choices:
-    # 1) Randomly assign the input to vectors and learn better embeddings during training; see the PyTorch documentation for guidance
-    # 2) Assign the input to vectors using pretrained word embeddings. We recommend any of {Word2Vec, GloVe, FastText}. Then, you do not train/update these embeddings.
-    # 3) You do the same as 2) but you train (this is called fine-tuning) the pretrained embeddings further.
+    # 1) Randomly assign the input to vectors and learn better embeddings during training; 
+    #    see the PyTorch documentation for guidance
+    # 2) Assign the input to vectors using pretrained word embeddings. We recommend any of 
+    #    {Word2Vec, GloVe, FastText}. Then, you do not train/update these embeddings.
+    # 3) You do the same as 2) but you train (this is called fine-tuning) the pretrained 
+    #    embeddings further.
     # Option 3 will be the most time consuming, so we do not recommend starting with this
 
     print("========== Vectorizing data ==========")
@@ -157,9 +161,7 @@ if __name__ == "__main__":
         for input_words, gold_label in tqdm(valid_data):
             input_words = " ".join(input_words)
             input_words = input_words.translate(input_words.maketrans("", "", string.punctuation)).split()
-            vectors = [word_embedding[i.lower()] if i.lower() in word_embedding.keys() else word_embedding['unk'] for i
-                       in input_words]
-
+            vectors = [word_embedding[i.lower()] if i.lower() in word_embedding.keys() else word_embedding['unk'] for i in input_words]
             vectors = torch.tensor(vectors, device=device).view(len(vectors), 1, -1)
             output = model(vectors)
             predicted_label = torch.argmax(output)
