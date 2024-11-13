@@ -4,14 +4,11 @@ Example for runnning the code:
 
 **FFNN**
 
-``python ffnn.py --hidden_dim 10 --epochs 1 ``
-``--train_data ./training.json --val_data ./validation.json``
-
+``python ffnn.py --train_data ./training.json --val_data ./validation.json --test_data ./test.json``
 
 **RNN**
 
-``python rnn.py --hidden_dim 32 --epochs 10 ``
-``--train_data training.json --val_data validation.json``
+``python rnn.py --train_data ./training.json --val_data ./validation.json --test_data ./test.json``
 
 Full set of arguments:
 
