@@ -1,21 +1,27 @@
 # starter code for a2
 
-Add the corresponding (one) line under the ``[to fill]`` in ``def forward()`` of the class for ffnn.py and rnn.py
-
-Feel free to modify other part of code, they are just for your reference.
-
----
-
-One example on running the code:
+Example for runnning the code:
 
 **FFNN**
 
-``python ffnn.py --hidden_dim 10 --epochs 1 ``
-``--train_data ./training.json --val_data ./validation.json``
-
+``python ffnn.py --train_data ./training.json --val_data ./validation.json --test_data ./test.json``
 
 **RNN**
 
-``python rnn.py --hidden_dim 32 --epochs 10 ``
-``--train_data training.json --val_data validation.json``
+``python rnn.py --train_data ./training.json --val_data ./validation.json --test_data ./test.json``
 
+Full set of arguments:
+
+``"-hd"`` or ``"--hidden_dim"``, default = 64 "hidden_dim"
+
+``"-e"`` or ``"--epochs"`` default = 20, "num of epochs to train"
+
+``"--lr"``, default = 0.01, "learning rate"
+
+``"--train_data"``, "path to training data"
+
+``"--val_data"``, "path to validation data"
+
+``"--test_data"``, "path to test data"
+
+``"--sweep"``, "perform hyperparameter sweep. needs wandb account."
